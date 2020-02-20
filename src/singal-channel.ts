@@ -1,7 +1,7 @@
 import { hostname } from 'os'
 import { EventEmitter } from 'events'
 import { createSocket, Socket } from 'dgram'
-import { broadcastAddress, localAddress } from './network'
+import { broadcastAddress, localAddress, LOOPBACK_ADDRESS } from './network'
 import { SIGNAL_PORT, BROADCAST_TIMEOUT, CLEAR_DEVICE_TIMEOUT } from './config'
 import { Device, Message, MessageType } from './types'
 
@@ -20,21 +20,21 @@ class SignalChannel extends EventEmitter {
         this.socket = createSocket('udp4')
         this.devices = new Map()
 
+        const [addr, cidrMask] = localAddress.split('/')
+        console.log(addr)
         this.socket.bind(SIGNAL_PORT, () => {
             this.socket.setBroadcast(true)
             this.emit(SignalChannelEvents.ready)
             this.broadcastIdentity()
             this.broadcastTimer = setInterval(this.broadcastIdentity, BROADCAST_TIMEOUT)
             this.socket.on('message', (message, info) => {
-                if (info.address !== localAddress && info.address !== '127.0.0.1') {
-                    this.processMessage(message)
-                }
+                if (info.address === addr || info.address === LOOPBACK_ADDRESS) return
+                this.processMessage(message)
             })
         })
     }
 
     private processMessage = (message: Buffer): void => {
-        console.log('recieved message ' + message.toString())
         const msg: Message = JSON.parse(message.toString())
         switch (msg.type) {
             case MessageType.identify: this.handleUserMessage(msg.payload); break
@@ -44,7 +44,6 @@ class SignalChannel extends EventEmitter {
         }
     }
     private broadcastIdentity = (): void => {
-        console.log('broadcasting...')
         const device = <Device>{ address: localAddress, name: this.name }
         const message = Buffer.from(JSON.stringify(<Message>{ type: MessageType.identify, payload: device }))
 

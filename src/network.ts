@@ -7,7 +7,7 @@ export enum IP_FAMILY {
   v6 = 'IPv6'
 }
 
-
+export const LOOPBACK_ADDRESS: string = '127.0.0.1'
 export function getLocalAddress(interfaces: { [name: string]: NetworkInterfaceInfo[] }, family: IP_FAMILY = IP_FAMILY.v4): string {
   const devices = Object.keys(interfaces)
   const bulk: NetworkInterfaceInfo[] = []
