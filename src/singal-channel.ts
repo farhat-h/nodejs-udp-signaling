@@ -52,6 +52,7 @@ class SignalChannel extends EventEmitter {
         })
     }
     private handleUserMessage = (device: Device) => {
+        console.log('found device' + device.name)
         if (this.devices.has(device)) {
             const timeoutHandle = this.devices.get(device)
             if (timeoutHandle) {
