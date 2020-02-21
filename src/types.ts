@@ -1,7 +1,6 @@
 export enum MessageType {
     identify = 'identify',
-    offer = 'identify',
-    accept = 'identify'
+    signal = 'signal',
 }
 
 export interface Device {

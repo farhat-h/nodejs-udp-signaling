@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
   "devDependencies": {
     "@types/ip": "^1.1.0",
     "@types/node": "^13.7.4",

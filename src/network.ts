@@ -20,5 +20,3 @@ export function getLocalAddress(interfaces: { [name: string]: NetworkInterfaceIn
 
 export const localAddress: string = getLocalAddress(networkInterfaces())
 export const { broadcastAddress } = ip.cidrSubnet(localAddress)
-
-console.log(localAddress, broadcastAddress)

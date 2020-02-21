@@ -7,21 +7,22 @@ import { Device, Message, MessageType } from './types'
 
 export enum SignalChannelEvents {
     ready = 'ready',
+    newDevice = 'new-device',
+    signal = 'signal',
 }
 
-class SignalChannel extends EventEmitter {
+export default class SignalChannel extends EventEmitter {
     static port: number = SIGNAL_PORT
     private socket: Socket
     private broadcastTimer?: NodeJS.Timeout
     public devices: Map<Device, NodeJS.Timeout>
-    constructor(public visible: boolean = true, public name: string = hostname()) {
+    constructor(public name: string = hostname()) {
 
         super()
         this.socket = createSocket('udp4')
         this.devices = new Map()
 
         const [addr, cidrMask] = localAddress.split('/')
-        console.log(addr)
         this.socket.bind(SIGNAL_PORT, () => {
             this.socket.setBroadcast(true)
             this.emit(SignalChannelEvents.ready)
@@ -36,10 +37,10 @@ class SignalChannel extends EventEmitter {
 
     private processMessage = (message: Buffer): void => {
         const msg: Message = JSON.parse(message.toString())
+
         switch (msg.type) {
             case MessageType.identify: this.handleUserMessage(msg.payload); break
-            case MessageType.offer: break
-            case MessageType.accept: break
+            case MessageType.signal: this.emit(SignalChannelEvents.signal, msg.payload); break
             default: break
         }
     }
@@ -52,13 +53,12 @@ class SignalChannel extends EventEmitter {
         })
     }
     private handleUserMessage = (device: Device) => {
-        console.log('found device' + device.name)
         if (this.devices.has(device)) {
             const timeoutHandle = this.devices.get(device)
             if (timeoutHandle) {
                 clearTimeout(timeoutHandle)
             }
-        }
+        } else { this.emit(SignalChannelEvents.newDevice, device) }
         this.devices.set(device, setTimeout(() => this.removeDevice(device), CLEAR_DEVICE_TIMEOUT))
     }
     private removeDevice = (device: Device): void => {
@@ -68,5 +68,3 @@ class SignalChannel extends EventEmitter {
         return Array.from(this.devices.keys())
     }
 }
-new SignalChannel()
-
