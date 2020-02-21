@@ -5,7 +5,7 @@ import { broadcastAddress, localAddress, LOOPBACK_ADDRESS } from './network'
 import { SIGNAL_PORT, BROADCAST_TIMEOUT, CLEAR_DEVICE_TIMEOUT } from './config'
 import { Device, Message, MessageType } from './types'
 
-export enum SignalChannelEvents {
+export enum ChannelEvents {
     ready = 'ready',
     newDevice = 'new-device',
     signal = 'signal',
@@ -25,7 +25,7 @@ export default class SignalChannel extends EventEmitter {
         const [addr, cidrMask] = localAddress.split('/')
         this.socket.bind(SIGNAL_PORT, () => {
             this.socket.setBroadcast(true)
-            this.emit(SignalChannelEvents.ready)
+            this.emit(ChannelEvents.ready)
             this.broadcastIdentity()
             this.broadcastTimer = setInterval(this.broadcastIdentity, BROADCAST_TIMEOUT)
             this.socket.on('message', (message, info) => {
@@ -40,7 +40,7 @@ export default class SignalChannel extends EventEmitter {
 
         switch (msg.type) {
             case MessageType.identify: this.handleUserMessage(msg.payload); break
-            case MessageType.signal: this.emit(SignalChannelEvents.signal, msg.payload); break
+            case MessageType.signal: this.emit(ChannelEvents.signal, msg.payload); break
             default: break
         }
     }
@@ -58,7 +58,7 @@ export default class SignalChannel extends EventEmitter {
             if (timeoutHandle) {
                 clearTimeout(timeoutHandle)
             }
-        } else { this.emit(SignalChannelEvents.newDevice, device) }
+        } else { this.emit(ChannelEvents.newDevice, device) }
         this.devices.set(device, setTimeout(() => this.removeDevice(device), CLEAR_DEVICE_TIMEOUT))
     }
     private removeDevice = (device: Device): void => {

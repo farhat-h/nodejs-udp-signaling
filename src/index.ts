@@ -1,13 +1,3 @@
-import Peer from 'simple-peer'
-import wrtc from 'wrtc'
-import SignalingChannel, { SignalChannelEvents } from './signaling-channel'
-import { Device } from './types'
+import Channel, { ChannelEvents } from './signaling-channel'
 
-class Terminal {
-    private peer?: Peer.Instance
-    private channel: SignalingChannel
-    constructor() {
-        this.channel = new SignalingChannel()
-    }
-
-}
+const channel: Channel = new Channel()
