@@ -1,1 +1,1 @@
-## Learning How to create P2P in NodeJS and Typescript 
+## Learning How to create  P2P application in NodeJS and Typescript 
